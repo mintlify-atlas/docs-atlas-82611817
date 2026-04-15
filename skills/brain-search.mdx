@@ -1,0 +1,73 @@
+---
+title: "/brain-search: query your wiki with citations"
+description: "Ask any question and get a synthesized, cited answer. Novel answers that draw together multiple wiki pages can be filed permanently as wiki/qa/ entries."
+---
+
+`/brain-search` runs the 4-step query workflow defined in `CLAUDE.md`. You ask a question in plain language — Claude runs hybrid search (vector + BM25) across the wiki, reads the 2–5 most relevant pages in full, and writes a synthesized answer with inline `[[wiki/page]]` citations. If your wiki doesn't have coverage on something, Claude says so explicitly rather than speculating. If the answer draws together multiple pages in a novel way, Claude offers to file it as a permanent `wiki/qa/` entry so the synthesis compounds next time you ask a related question.
+
+## Query workflow
+
+<Steps>
+  <Step title="Search the wiki">
+    Claude runs hybrid search across the `wiki` collection and reads `wiki/index.md` to confirm coverage and catch any pages the search missed. It then reads the 2–5 most relevant pages in full before synthesizing.
+
+    ```bash
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd query -c wiki "<your question>"
+    ```
+
+    The `-c wiki` flag scopes the search to the wiki collection. Omit it to search all collections (wiki, raw-sources, human, daily-notes).
+  </Step>
+  <Step title="Synthesize an answer">
+    Claude writes the answer with inline `[[wiki/page]]` citations throughout. Confidence is explicit: if pages are sparse or a topic has no coverage, Claude flags it with "The wiki doesn't have coverage on X" rather than padding with speculation.
+  </Step>
+  <Step title="Offer to file the answer">
+    If the answer synthesizes multiple pages in a way worth preserving, Claude asks:
+
+    > "This answer synthesizes several pages in a useful way — want me to file it as a Q&A page?"
+
+    If you say yes, Claude creates `wiki/qa/[slug].md` with `type: qa` frontmatter, adds it to the Q&A section in `wiki/index.md`, and adds cross-links from the relevant topic pages.
+  </Step>
+  <Step title="Log significant queries">
+    For queries that reveal new understanding or surface a gap worth tracking, Claude appends to `wiki/log.md`:
+
+    ```
+    ## [YYYY-MM-DD] query | Brief question summary
+
+    Filed as: [[wiki/qa/slug]] (or "not filed")
+    ```
+
+    Routine lookups are not logged.
+  </Step>
+</Steps>
+
+## Search modes
+
+The underlying `qmd` tool supports three search modes. `/brain-search` uses the hybrid mode by default, which produces the best results for topic discovery.
+
+| Command | Mode | Best for |
+|---|---|---|
+| `qmd query -c wiki "<question>"` | Hybrid (vector + BM25) | Topic discovery, open-ended questions |
+| `qmd search -c wiki "<terms>"` | Keyword (BM25 only) | Fast exact-term lookup |
+| `qmd vsearch -c wiki "<question>"` | Vector (semantic) | Semantic similarity, concept matching |
+
+Add `--json` to any command for structured output.
+
+## Filed answers
+
+When you confirm filing, the answer is saved at `wiki/qa/[slug].md` with this frontmatter:
+
+```yaml
+---
+type: qa
+tags: [relevant-tags]
+sources: ["[[wiki/sources/source-slug]]"]
+related: ["[[wiki/related-page]]"]
+updated: YYYY-MM-DD
+---
+```
+
+Filed answers appear in `wiki/index.md` and are cross-linked from the topic pages they draw on, so future searches surface them as first-class wiki content.
+
+<Note>
+  `/brain-search` is a **global** skill installed at `~/.claude/skills/brain-search/SKILL.md`. It is available in any Claude Code session, not just inside your vault directory.
+</Note>

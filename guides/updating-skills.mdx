@@ -1,0 +1,77 @@
+---
+title: "Update and manage your wiki skills"
+description: "Skills are Claude Code slash commands installed at scaffold time. Learn how to update them independently using the npx skills command."
+---
+
+Skills are Claude Code slash commands loaded from `SKILL.md` files on disk. They are installed when you run `npx claude-second-brain`, but they live independently of the package — you can update them at any time without re-scaffolding your vault.
+
+## Skill scopes
+
+The seven skills ship in two scopes depending on where they are useful.
+
+**Global skills** work in any Claude Code session on your machine, not just inside your vault. The scaffold installs these three to `~/.claude/skills/`:
+
+| Skill | Install location |
+|---|---|
+| `brain-ingest` | `~/.claude/skills/brain-ingest/SKILL.md` |
+| `brain-search` | `~/.claude/skills/brain-search/SKILL.md` |
+| `brain-refresh` | `~/.claude/skills/brain-refresh/SKILL.md` |
+
+**Vault-local skills** are only available when Claude Code is opened inside your vault directory. These four are installed to `.claude/skills/` at the root of your vault:
+
+| Skill | Install location |
+|---|---|
+| `brain-rebuild` | `.claude/skills/brain-rebuild/SKILL.md` |
+| `lint` | `.claude/skills/lint/SKILL.md` |
+| `setup` | `.claude/skills/setup/SKILL.md` |
+| `qmd-cli` | `.claude/skills/qmd-cli/SKILL.md` |
+
+<Note>
+  `npx skills` is the skills marketplace CLI for Claude Code. It reads, installs, and updates skill packs from URLs — the same mechanism used by `npx claude-second-brain` under the hood.
+</Note>
+
+## Install or update all skills
+
+To pull the latest versions of all seven skills from the template in one command, run:
+
+```bash
+npx skills add https://github.com/jessepinkman9900/claude-second-brain/tree/main/template/.claude/skills -a claude-code -y
+```
+
+This fetches every skill directory under `template/.claude/skills/` and writes the `SKILL.md` files to the correct locations. Existing files are overwritten.
+
+## Update a specific skill
+
+If you only want to refresh one skill — for example after a bug fix to `brain-ingest` — pass the `--skill` flag:
+
+```bash
+npx skills add https://github.com/jessepinkman9900/claude-second-brain/tree/main/template/.claude/skills --skill brain-ingest -a claude-code -y
+```
+
+Replace `brain-ingest` with any of the seven skill names listed above.
+
+## Keep skills up to date
+
+Once you have installed skills via `npx skills`, future updates no longer require the full URL. Run:
+
+```bash
+npx skills update -a claude-code
+```
+
+This checks every registered skill source for newer versions and updates in place.
+
+<Tip>
+  Run `npx skills update -a claude-code` periodically to pick up prompt improvements, new qmd command flags, and bug fixes without touching your vault structure.
+</Tip>
+
+## All skills at a glance
+
+| Skill | Scope | Install location |
+|---|---|---|
+| `brain-ingest` | Global | `~/.claude/skills/brain-ingest/` |
+| `brain-search` | Global | `~/.claude/skills/brain-search/` |
+| `brain-refresh` | Global | `~/.claude/skills/brain-refresh/` |
+| `brain-rebuild` | Vault-local | `.claude/skills/brain-rebuild/` |
+| `lint` | Vault-local | `.claude/skills/lint/` |
+| `setup` | Vault-local | `.claude/skills/setup/` |
+| `qmd-cli` | Vault-local | `.claude/skills/qmd-cli/` |

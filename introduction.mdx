@@ -1,0 +1,53 @@
+---
+title: "What is claude-second-brain?"
+description: "claude-second-brain scaffolds a personal knowledge base powered by Claude Code, qmd, Obsidian, and GitHub. Not a RAG system — an actively maintained wiki."
+---
+
+claude-second-brain is the fastest way to start a personal knowledge base powered by Claude Code, qmd, Obsidian, and GitHub. You drop a source in, run `/brain-ingest`, and Claude reads it — extracts what matters, cross-links it to everything you already know, and files it into a structured wiki. Ask a question six months later and you get cited answers with inline `[[wiki/page]]` references, not a list of files to re-read.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Scaffold your brain and run your first ingest in three steps.
+  </Card>
+  <Card title="How it works" icon="diagram-project" href="/concepts/how-it-works">
+    See the full data flow from raw source to cited answer.
+  </Card>
+  <Card title="Skills reference" icon="wand-magic-sparkles" href="/skills/overview">
+    Explore all seven Claude Code slash commands included in the kit.
+  </Card>
+  <Card title="Wiki schema" icon="file-lines" href="/wiki/schema">
+    Learn the five page types and frontmatter format Claude uses.
+  </Card>
+</CardGroup>
+
+## How this is different from RAG
+
+This is not a RAG system. It's not a chatbot over your notes. A RAG system retrieves chunks of raw text and feeds them to a language model at query time — the knowledge never actually accumulates. claude-second-brain is an **actively maintained, cross-linked wiki**: five structured page types, YAML frontmatter, and a set of Claude Code skills that keep the whole thing coherent over time.
+
+The schema (`CLAUDE.md`) is the idea file. Claude reads it at the start of every session and uses it to maintain consistent page types, naming conventions, cross-links, and contradiction flags — so knowledge compounds with every ingest instead of sitting in a flat pile.
+
+## The stack
+
+Every tool has a specific role. Nothing is redundant.
+
+| Tool | Role |
+|---|---|
+| **Claude Code** | Reads sources, writes wiki pages, cross-links, flags contradictions |
+| **qmd** | Local hybrid search (vector + BM25) across your entire wiki |
+| **Obsidian** | Graph view, backlinks, mobile reading — offline, no extra sync |
+| **GitHub** | Source of truth — version history, Claude Code anywhere, Obsidian sync |
+
+Everything is pre-configured. You bring the sources.
+
+## Key value proposition
+
+You've been reading papers, articles, and books for years. Most of that reading is lost — highlights in a dead folder, bookmarks you'll never reopen. claude-second-brain closes that loop:
+
+- **Ingest any source** — article, PDF, or personal note — and Claude summarizes it, asks what matters most to you, and integrates the knowledge into interlinked wiki pages.
+- **Search with citations** — ask anything and get an answer with inline `[[wiki/page]]` links, synthesized from pages that were already there.
+- **Maintain over time** — contradictions are flagged, orphan pages surfaced, and the overview page updated as your wiki grows.
+- **Access anywhere** — edit from Claude Code on any device, read offline in Obsidian, browse on GitHub.
+
+<Note>
+  Inspired by [Andrej Karpathy's approach to LLM-powered knowledge management](https://x.com/karpathy/status/2040470801506541998?s=20) — share an "idea file" with an LLM agent and let it build and maintain your knowledge base. `CLAUDE.md` is that idea file.
+</Note>

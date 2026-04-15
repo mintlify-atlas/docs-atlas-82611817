@@ -1,0 +1,86 @@
+---
+title: "/setup: initialize qmd for your vault"
+description: "First-time vault initialization: register qmd collections and contexts, then generate local vector embeddings for every markdown file in your vault."
+---
+
+`/setup` is the first command you run after scaffolding a new vault. It registers the qmd collections and contexts that every other skill depends on, then generates local vector embeddings for all markdown files. Run it once — after that, use [/brain-refresh](/skills/brain-refresh) to keep the index up to date as your wiki grows.
+
+## When to run it
+
+- **First-time setup** — right after running `npx claude-second-brain` and opening the vault in Claude Code.
+- **Re-registering collections** — after changing `scripts/qmd/setup.ts` (for example, after a `/brain-rebuild`).
+- **Re-indexing only** — pass `reindex` as an argument to skip collection registration and only re-index files after a bulk ingest session.
+
+## Setup steps
+
+<Steps>
+  <Step title="Register collections and contexts">
+    Claude runs the setup script, which registers the two core qmd collections and their path-level context descriptions. This is idempotent — safe to re-run if collections already exist.
+
+    ```bash
+    pnpm qmd:setup
+    ```
+
+    The two collections registered are:
+
+    | Collection | Root path | What it indexes |
+    |---|---|---|
+    | `wiki` | `wiki/` | All wiki pages — topics, entities, source summaries, Q&A |
+    | `raw-sources` | `raw-sources/` | Raw articles, PDFs, and personal notes |
+  </Step>
+  <Step title="Index files and generate embeddings">
+    Claude runs the reindex script, which scans all collections for files and generates local vector embeddings.
+
+    ```bash
+    pnpm qmd:reindex
+    ```
+
+    <Warning>
+      The first run downloads approximately 2 GB of local GGUF embedding models. This takes a while and requires a reliable internet connection. After the download, models are cached — subsequent runs and other vaults on the same machine skip the download entirely.
+    </Warning>
+  </Step>
+  <Step title="Verify installation">
+    Claude runs three commands to confirm everything is working:
+
+    ```bash
+    # List registered collections (expect: wiki, raw-sources)
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd collection list
+
+    # List registered contexts
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd context list
+
+    # Show index status and embedding counts
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd status
+    ```
+
+    Both collections should appear in `collection list`. The `status` command should show non-zero document and embedding counts. If embeddings show as `0`, re-run step 2.
+  </Step>
+</Steps>
+
+## Re-index only
+
+To skip collection registration and only re-index files — for example after a bulk ingest session — pass `reindex` as the argument, or run the command directly:
+
+```bash
+pnpm qmd:reindex
+```
+
+Do not re-run `pnpm qmd:setup` on every session — collection registration is only needed when the schema changes.
+
+## Prerequisites
+
+Before running `/setup`, make sure the following are in place:
+
+```bash
+# Install Node.js and pnpm via mise
+mise install
+
+# Install project dependencies
+pnpm install
+```
+
+`node` and `pnpm` are managed via `mise`. The scaffold CLI installs `mise` automatically if it is not already present. If `pnpm dlx @tobilu/qmd` commands fail after setup, re-run `pnpm qmd:setup` followed by `pnpm qmd:reindex`.
+
+<Note>
+  `/setup` is a **vault-local** skill installed at `.claude/skills/setup/SKILL.md` inside your vault. It only runs in Claude Code sessions started from the vault directory.
+</Note>

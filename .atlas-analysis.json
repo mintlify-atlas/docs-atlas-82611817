@@ -1,0 +1,79 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "claude-second-brain",
+  "projectDescription": "A CLI scaffolder that creates a personal knowledge base powered by Claude Code, Obsidian, qmd semantic search, and GitHub — turning your raw reading material into a compounding, cross-linked wiki.",
+  "theme": "luma",
+  "primaryColor": "#7C3AED",
+  "lightColor": "#EDE9FE",
+  "darkColor": "#4C1D95",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "concepts/how-it-works"
+            ]
+          },
+          {
+            "group": "Wiki Reference",
+            "pages": [
+              "wiki/schema",
+              "wiki/directory-layout",
+              "wiki/access-anywhere"
+            ]
+          },
+          {
+            "group": "Skills",
+            "pages": [
+              "skills/overview",
+              "skills/brain-ingest",
+              "skills/brain-search",
+              "skills/brain-refresh",
+              "skills/brain-rebuild",
+              "skills/lint",
+              "skills/setup"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/updating-skills",
+              "guides/roadmap"
+            ]
+          },
+          {
+            "group": "Release Notes",
+            "pages": [
+              "changelog"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "One-command scaffold via `npx claude-second-brain`",
+    "Claude Code slash commands for ingest, search, lint, and maintenance",
+    "Local hybrid semantic search (vector + BM25) powered by qmd",
+    "Scaffolded vault is a ready-to-use Obsidian vault with obsidian-git pre-configured",
+    "GitHub as source of truth with anywhere access via Claude Code and Obsidian mobile",
+    "Five structured wiki page types with YAML frontmatter",
+    "Automatic contradiction flagging and cross-linking"
+  ],
+  "publicApiSurface": [
+    "npx claude-second-brain [folder-name]",
+    "/brain-ingest — ingest a source into the wiki",
+    "/brain-search — hybrid semantic search and cited answers",
+    "/brain-refresh — re-index changed files",
+    "/brain-rebuild — destructively redesign the qmd schema",
+    "/lint — health-check orphans, broken links, contradictions",
+    "/setup — first-time qmd initialization",
+    "bin/create.js — CLI entry point",
+    "template/ — vault scaffold template"
+  ]
+}

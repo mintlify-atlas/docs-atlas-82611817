@@ -1,0 +1,63 @@
+---
+title: "Access your vault from anywhere"
+description: "Edit with Claude Code, read in Obsidian desktop and mobile, or browse on GitHub — three access modes that work together seamlessly."
+---
+
+Your vault is a GitHub repository, which means it is accessible from any device without any proprietary sync service. You can edit it from a terminal, read it as a rich graph in Obsidian, or browse it directly in a browser. Each mode serves a different workflow, and all three stay in sync through the same git repository.
+
+<CardGroup cols={3}>
+  <Card title="Edit anywhere" icon="terminal">
+    Claude Code on desktop and mobile via GitHub integration. Ingest sources, run queries, and update wiki pages from any device.
+  </Card>
+  <Card title="Read anywhere" icon="book-open">
+    Obsidian on desktop and mobile with obsidian-git pre-configured. Graph view, backlinks, and offline reading — no extra sync setup.
+  </Card>
+  <Card title="Browse anywhere" icon="github">
+    Plain GitHub repo. View and edit files in the browser at any time, from any device with a browser.
+  </Card>
+</CardGroup>
+
+## Edit anywhere — Claude Code
+
+Claude Code's GitHub integration lets you open any repository and start a session without cloning to a local machine. This means you can run `/brain-ingest`, `/brain-search`, or any other wiki skill from your phone, a shared workstation, or a remote machine — wherever you can run Claude Code.
+
+**On desktop**, open the vault folder in Claude Code the same way you would any project:
+
+```bash
+cd my-brain && claude
+```
+
+**On mobile or a remote machine**, use Claude Code's GitHub integration to connect to the repo directly. You do not need a local clone — Claude Code fetches and writes files through the GitHub API. The wiki skills work identically in both modes.
+
+Because GitHub is the source of truth, changes made in one Claude Code session are immediately available in every other session after a `git pull`. The obsidian-git plugin in Obsidian handles that pull automatically on a schedule.
+
+## Read anywhere — Obsidian
+
+Obsidian provides the richest reading experience: graph view of all cross-links, backlink panels, tag filtering, and full offline access. The vault is pre-configured as an Obsidian vault — open the `my-brain/` folder directly in Obsidian and it works immediately.
+
+**obsidian-git is pre-configured.** The community plugin is listed in `.obsidian/community-plugins.json` and ships with the scaffold. Enable it once in Obsidian's community plugin settings and it will auto-commit and pull on a schedule. Your wiki stays in sync across devices without any manual git commands from within Obsidian.
+
+**Obsidian desktop** — clone or pull the repo to your machine, open the folder as a vault. No additional setup required.
+
+**Obsidian mobile (Android)** — clone the repo to a location accessible from Obsidian Mobile and open it as a vault.
+
+<Tip>
+  **iOS**: Place the vault folder inside iCloud Drive. Obsidian Mobile on iOS picks it up natively — no extra sync app or configuration needed. On your Mac, clone to `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/my-brain/` (or any iCloud Drive folder), then open it as a vault in Obsidian on your iPhone or iPad.
+</Tip>
+
+Graph view, backlinks, tag pane, and offline reading all work across every platform. Because every wiki page uses Obsidian `[[wikilinks]]`, the graph reflects the real cross-link structure Claude builds as sources are ingested.
+
+## Browse anywhere — GitHub
+
+The vault is a plain GitHub repository. At any time, from any device with a browser, you can:
+
+- Navigate and read every wiki page in the GitHub file browser
+- Edit files directly in the browser using GitHub's built-in editor
+- View the full commit history to see exactly what Claude changed and when
+- Create issues or pull requests if you want to track planned ingestions
+
+<Note>
+  The GitHub repository is the source of truth for the entire system. Keep it private to protect your personal knowledge base — the setup CLI offers to create a private repo automatically.
+</Note>
+
+Because every device reads and writes through the same GitHub repo, there is no risk of divergence between your Obsidian vault, your desktop Claude Code session, and your mobile Claude Code session. Commit history also gives you a complete audit log of every wiki change Claude has ever made.

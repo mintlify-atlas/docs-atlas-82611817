@@ -1,0 +1,72 @@
+---
+title: "/brain-refresh: re-index changed wiki files"
+description: "Re-scans all qmd collections for new and changed files and regenerates vector embeddings. Pass 'force' to re-embed every chunk after a model change."
+---
+
+`/brain-refresh` keeps your search index in sync with the current state of the vault. After a bulk ingest session or manual edits to `wiki/` or `raw-sources/`, the qmd index may be stale — new pages won't appear in search results, and changed pages will return outdated content. Running `/brain-refresh` re-scans all collections, updates the file index, and regenerates vector embeddings for any chunks that need them. Only changed chunks are re-embedded, so incremental refreshes are fast.
+
+## When to run it
+
+- After a `/brain-ingest` session (or several) — batch the refresh rather than running it after every file edit.
+- After manual edits to `wiki/` or `raw-sources/` files.
+- When `/brain-search` results feel stale or miss recently added content.
+- After upgrading `@tobilu/qmd` or changing the embedding model — use `force` mode in this case.
+
+<Tip>
+  Do not run `/brain-refresh` after every single file edit. Batch it at the end of a work session for best performance.
+</Tip>
+
+## Incremental refresh (default)
+
+The default behavior runs an incremental refresh:
+
+```bash
+pnpm qmd:reindex
+```
+
+This script does two things in sequence:
+
+1. **Update** — scans all collections for new, changed, or deleted files and updates the index.
+2. **Embed** — generates vector embeddings for any chunks that need them.
+
+Only chunks that changed get re-embedded, so subsequent runs are significantly faster than the first.
+
+## Force refresh
+
+Pass `force` as an argument to `/brain-refresh` to re-embed every chunk — not just the changed ones. Use this after an embedding model change or if embeddings appear corrupted.
+
+```bash
+# Step 1 — update the file index
+pnpm qmd:reindex
+
+# Step 2 — force re-embed every chunk
+# (INDEX_PATH is the qmd index path you set during scaffolding)
+INDEX_PATH=~/.cache/qmd/index.sqlite pnpm dlx @tobilu/qmd embed -f
+```
+
+<Warning>
+  Force mode re-embeds the entire vault, which can take significant time on a large wiki. Claude will ask you to confirm before proceeding.
+</Warning>
+
+## Verify the refresh
+
+After refreshing, confirm everything looks correct:
+
+```bash
+# Use the qmd index path you set during scaffolding (default: ~/.cache/qmd/index.sqlite)
+INDEX_PATH=~/.cache/qmd/index.sqlite pnpm dlx @tobilu/qmd status
+```
+
+Document and embedding counts should be non-zero and reflect recent activity. If embeddings show as `0` or are far below the document count, re-run the refresh.
+
+<Note>
+  The first run of any embedding command downloads approximately 2 GB of local GGUF models. This is a one-time download — models are cached across vaults after that.
+</Note>
+
+## Difference from /brain-rebuild
+
+`/brain-refresh` updates the index to match the current files — it does not change the qmd schema (collections, contexts, or context descriptions). To redesign the schema itself, use [/brain-rebuild](/skills/brain-rebuild).
+
+<Note>
+  `/brain-refresh` is a **global** skill installed at `~/.claude/skills/brain-refresh/SKILL.md`. It is available in any Claude Code session, not just inside your vault directory.
+</Note>

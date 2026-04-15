@@ -1,97 +1,67 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "claude-second-brain: Your compounding knowledge base"
+description: "claude-second-brain scaffolds a cross-linked wiki powered by Claude Code, Obsidian, qmd semantic search, and GitHub — in a single npx command."
 ---
 
-## Setting up
+claude-second-brain turns years of reading into a living, cross-linked wiki. One `npx` command scaffolds the full stack: Claude Code ingests your sources and maintains the wiki, qmd powers local hybrid search, the vault opens directly in Obsidian, and GitHub keeps everything versioned and accessible from anywhere.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Scaffold your brain and run your first ingest in three steps.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="How it works" icon="diagram-project" href="/concepts/how-it-works">
+    See the full data flow from raw source to cited answer.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Skills reference" icon="wand-magic-sparkles" href="/skills/overview">
+    Explore all seven Claude Code slash commands included in the kit.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Wiki schema" icon="file-lines" href="/wiki/schema">
+    Learn the five page types and frontmatter format Claude uses.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What makes this different
 
-Everything you need to create world-class documentation.
+This is not a RAG system or a chatbot over your notes. It's an **actively maintained, cross-linked wiki** — Claude reads every source, extracts what matters, files it into structured pages, and cross-links it to everything you already know.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+<CardGroup cols={2}>
+  <Card title="Ingest any source" icon="file-import" href="/skills/brain-ingest">
+    Drop an article, PDF, or personal note in `raw-sources/` and run `/brain-ingest`.
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="Search with citations" icon="magnifying-glass" href="/skills/brain-search">
+    Ask anything — get cited answers with `[[wiki/page]]` links, not a list of files.
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
+  <Card title="Obsidian vault ready" icon="vault" href="/wiki/access-anywhere">
+    The scaffolded folder is a valid Obsidian vault with obsidian-git pre-configured.
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
+  <Card title="Anywhere access" icon="mobile" href="/wiki/access-anywhere">
+    Edit via Claude Code on any device. Read offline in Obsidian mobile or GitHub.
   </Card>
-</Columns>
+</CardGroup>
 
-## Need inspiration?
+## The stack
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+| Tool | Role |
+|---|---|
+| **Claude Code** | Reads sources, writes wiki pages, cross-links, flags contradictions |
+| **qmd** | Local hybrid search (vector + BM25) across your entire wiki |
+| **Obsidian** | Graph view, backlinks, mobile reading — offline, no extra sync |
+| **GitHub** | Source of truth — version history, Claude Code anywhere, Obsidian sync |
+
+## Get started in one command
+
+```bash
+npx claude-second-brain
+```
+
+<Steps>
+  <Step title="Scaffold">
+    Run `npx claude-second-brain`. The CLI asks for a folder name, qmd index path, and optionally creates a private GitHub repo and pushes automatically.
+  </Step>
+  <Step title="Initialize">
+    `cd my-brain && claude`, then run `/setup`. Registers qmd collections and generates local vector embeddings. Downloads ~2 GB of GGUF models once.
+  </Step>
+  <Step title="Open in Obsidian">
+    Open `my-brain/` as a vault in Obsidian. The Git plugin is pre-configured — enable it for automatic sync on every commit.
+  </Step>
+</Steps>

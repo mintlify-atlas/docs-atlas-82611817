@@ -1,0 +1,93 @@
+---
+title: "/brain-rebuild: redesign the qmd schema"
+description: "Destructive schema redesign: analyze the wiki, propose new qmd collections and contexts, then patch setup.ts and rebuild the index — with your approval."
+---
+
+`/brain-rebuild` redesigns the qmd schema based on what your wiki actually contains today, then rebuilds the search index from scratch. Use it when the wiki has grown into new domains that deserve their own collections, or when you want finer-grained context descriptions per sub-folder. This is not a routine maintenance command — for re-indexing without schema changes, use [/brain-refresh](/skills/brain-refresh) instead.
+
+<Warning>
+  `/brain-rebuild` is **destructive**. It drops existing collections and their embeddings, then rebuilds from scratch. Re-embedding a large wiki takes significant time and may download GGUF models if not already cached. Claude always waits for your explicit approval before applying any changes.
+</Warning>
+
+## When to use it
+
+- The wiki has grown and the current single `wiki` collection no longer matches how you search.
+- You want finer-grained contexts — for example, distinct context descriptions per sub-folder or by domain.
+- After a significant reorganization of `wiki/` or `raw-sources/` folder structure.
+
+## Rebuild workflow
+
+<Steps>
+  <Step title="Survey the current state">
+    Claude reads `scripts/qmd/setup.ts` to see the current collections and contexts, reads `CLAUDE.md` to understand the documented schema, then queries qmd for the live state:
+
+    ```bash
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd collection list
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd context list
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd status
+    ```
+  </Step>
+  <Step title="Analyze the wiki">
+    Claude globs `wiki/**/*.md` and `raw-sources/**/*.md`, reads `wiki/index.md` and `wiki/overview.md`, and identifies natural topic clusters, page-type distribution, and folder structure. This informs the proposed schema.
+  </Step>
+  <Step title="Propose a new schema">
+    Claude produces a recommendation covering:
+
+    - **Collections** — name, root path (relative to vault), file glob pattern, and justification for each split.
+    - **Contexts** — global context plus per-collection and per-subpath descriptions. Each context is a one-sentence description that helps search disambiguate between similar pages.
+    - **Migration impact** — what changes for `/brain-ingest`, `/brain-search`, `/lint`, and `CLAUDE.md` (for example, if the `wiki` collection is renamed, all `-c wiki` invocations break).
+
+    The recommendation is presented as a clear diff against the current schema. No files are modified at this step.
+  </Step>
+  <Step title="Wait for your approval">
+    Claude asks: "Apply this schema? This will drop existing collections and their embeddings, then rebuild from scratch. Re-embedding the full wiki may take significant time and download GGUF models if not cached."
+
+    Claude does not proceed without an explicit yes from you.
+  </Step>
+  <Step title="Apply the schema changes">
+    After approval, Claude:
+
+    1. Edits `scripts/qmd/setup.ts` — updates `ensureCollection` calls, `setGlobalContext`, and `addContext` calls to match the new schema.
+    2. Updates every `-c <collection>` reference in `CLAUDE.md` and in the vault-local skill files (`brain-ingest`, `brain-search`, `lint`).
+    3. Removes old collections and contexts from the index:
+
+    ```bash
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd collection remove <old-name>
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd context rm <path>
+    ```
+
+    4. Registers the new schema (idempotent — existing collections that were kept are skipped):
+
+    ```bash
+    pnpm qmd:setup
+    ```
+
+    5. Rebuilds embeddings from scratch:
+
+    ```bash
+    pnpm qmd:reindex
+    ```
+  </Step>
+  <Step title="Verify and report">
+    Claude confirms the new collections appear, contexts match the plan, and document/embedding counts are non-zero:
+
+    ```bash
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd collection list
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd context list
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd status
+    ```
+
+    Claude reports a summary: collections added/removed/renamed, contexts updated, files re-indexed, and references updated in `CLAUDE.md` and skill files.
+  </Step>
+</Steps>
+
+## Hard rules
+
+- Claude never applies schema changes without your explicit approval.
+- Claude never deletes a collection without first showing you what will be dropped.
+- `CLAUDE.md` and all skill files are always updated in lockstep with collection renames — stale `-c <name>` references silently break `/brain-search`.
+- This skill changes the index schema, not your data. `wiki/`, `raw-sources/`, and all user content are never touched.
+
+<Note>
+  `/brain-rebuild` is a **vault-local** skill installed at `.claude/skills/brain-rebuild/SKILL.md` inside your vault. It only runs in Claude Code sessions started from the vault directory.
+</Note>

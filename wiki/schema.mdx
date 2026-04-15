@@ -1,0 +1,96 @@
+---
+title: "Wiki schema and page types"
+description: "The five page types, YAML frontmatter fields, naming conventions, and hard rules that govern every page Claude writes in your wiki."
+---
+
+The wiki schema is the contract between you and Claude. It lives in `CLAUDE.md` at the vault root and defines exactly how every page is structured, named, and cross-linked. Claude reads this file at the start of every session before doing any wiki work — it is the authoritative source of truth, not a guideline.
+
+<Note>
+  `CLAUDE.md` is the schema Claude reads every session. This page is a human-readable summary of its contents. If anything here conflicts with `CLAUDE.md`, the file wins.
+</Note>
+
+## Page types
+
+The wiki uses five content page types plus a sixth admin type. Each type has a fixed location and purpose — Claude does not invent new page types.
+
+| Type | File location | Purpose |
+|---|---|---|
+| `overview` | `wiki/overview.md` | The single evolving synthesis page. Updated when a new source meaningfully shifts the overall picture. Structured as a narrative with cross-links, not a list. |
+| `topic` | `wiki/[kebab-name].md` | Notes on a concept, technology, domain, or idea. Examples: `wiki/distributed-systems.md`, `wiki/machine-learning-ops.md`. |
+| `entity` | `wiki/[name].md` | Notes on a specific person, company, tool, project, or place. Examples: `wiki/anthropic.md`, `wiki/kafka.md`, `wiki/ray-dalio.md`. |
+| `source-summary` | `wiki/sources/[slug].md` | Summary of one ingested source. Slug is kebab-case derived from the title. One page per source, never merged. |
+| `qa` | `wiki/qa/[slug].md` | A filed answer to a notable query. Created when an answer synthesizes multiple pages in a way worth preserving. |
+| `admin` | `wiki/index.md`, `wiki/log.md` | System pages only. Not synthesis content. Exactly two exist: the master index and the activity log. |
+
+## Frontmatter format
+
+Every wiki page opens with YAML frontmatter. The `type` and `updated` fields are the minimum — Claude will not create a page without them.
+
+```yaml
+---
+type: overview | topic | entity | source-summary | qa | admin
+tags: [tag1, tag2]
+sources: ["[[wiki/sources/source-slug]]"]
+related: ["[[wiki/related-page]]"]
+updated: YYYY-MM-DD
+---
+```
+
+### Field reference
+
+| Field | Required | Description |
+|---|---|---|
+| `type` | Yes | One of the six page types listed above. |
+| `tags` | No | Lowercase, hyphenated tags for the Obsidian tag pane. Example: `[machine-learning, inference]`. |
+| `sources` | No | Wikilinks to `wiki/sources/` pages that informed this page. Grows as more sources touch the topic. |
+| `related` | No | Wikilinks to other wiki pages directly relevant to this one. Used for navigation and graph density. |
+| `updated` | Yes | ISO date (`YYYY-MM-DD`) of the last meaningful revision. Updated by Claude on every write. |
+
+## Naming conventions
+
+File and link naming is strict. Claude follows these rules without exception:
+
+- **File names** — kebab-case, all lowercase. Use `machine-learning-ops.md`, not `MachineLearningOps.md` or `machine_learning_ops.md`.
+- **Internal links** — always use Obsidian `[[wikilinks]]`, never bare URLs or markdown `[text](path)` links for internal cross-references.
+- **Link format** — use the full path from vault root: `[[wiki/distributed-systems]]`, `[[wiki/sources/attention-is-all-you-need]]`.
+- **Section headings** — `##` for top-level sections within a page, `###` for subsections. Never use `#` inside a page body.
+
+## Contradiction flagging and uncertainty
+
+When two sources disagree, Claude marks the conflict directly on the page rather than silently picking one position.
+
+**Contradiction callout** — placed on the affected wiki page with both claims and both sources stated:
+
+```
+> [!WARNING] Contradiction
+> Source A claims X. Source B claims Y. See [[wiki/sources/source-a]] and [[wiki/sources/source-b]].
+```
+
+**Uncertainty marker** — used inline when Claude is not confident in a specific claim:
+
+```
+The training run used approximately 6,000 H100s [?].
+```
+
+The `/lint` skill surfaces all unresolved `[!WARNING]` callouts during a health check.
+
+## Admin pages
+
+There are exactly two admin pages. Claude never deletes or renames them.
+
+| Page | Purpose |
+|---|---|
+| `wiki/index.md` | Master index of all wiki pages, organized by type. Updated by Claude after every ingest. |
+| `wiki/log.md` | Running append-only log of all wiki activity (ingests, queries, lint runs). Claude never overwrites this file — it only appends. |
+
+## Hard rules
+
+These rules are non-negotiable. Claude enforces them on every write.
+
+1. **Never modify anything in `raw-sources/`** — these are immutable raw inputs.
+2. **Never touch existing vault files** (daily notes, misc, ideas, root-level `.md` files, `.obsidian/`). The wiki lives only in `wiki/`.
+3. **Always append to `wiki/log.md`** — never overwrite it.
+4. **One source summary per ingested source** in `wiki/sources/`. Never merge two sources into one summary page.
+5. **Every wiki page must have frontmatter** with at least `type` and `updated`.
+6. **Cross-link aggressively** — if you mention a topic or entity that has (or should have) a wiki page, link it with `[[wiki/page]]`.
+7. **Write synthesis, not transcription** — wiki pages reflect integrated understanding, not copied excerpts.

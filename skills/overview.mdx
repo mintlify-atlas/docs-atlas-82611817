@@ -1,0 +1,78 @@
+---
+title: "Claude Code skills for your wiki"
+description: "Seven slash commands for the wiki workflow: ingest sources, search with citations, health-check pages, refresh embeddings, and redesign the qmd schema."
+---
+
+Skills are Claude Code slash commands that ship with every claude-second-brain vault. Instead of manually prompting Claude each time, you invoke a named command — Claude loads the skill's instructions and runs a structured, repeatable workflow. No copy-pasting, no forgotten steps.
+
+## Daily workflow
+
+<CardGroup cols={2}>
+  <Card title="/brain-ingest" icon="file-import" href="/skills/brain-ingest">
+    Drop a file into `raw-sources/` and run `/brain-ingest`. Claude reads the source, writes a summary page, updates related topic pages, and flags contradictions.
+  </Card>
+  <Card title="/brain-search" icon="magnifying-glass" href="/skills/brain-search">
+    Ask anything. Claude runs hybrid search, reads the most relevant pages, and returns a cited answer with inline `[[wiki/page]]` links.
+  </Card>
+  <Card title="/lint" icon="circle-check" href="/skills/lint">
+    Health-check the wiki. Surfaces orphan pages, broken links, unresolved contradictions, stale claims, and data gaps.
+  </Card>
+</CardGroup>
+
+## Maintenance
+
+<CardGroup cols={2}>
+  <Card title="/brain-refresh" icon="arrows-rotate" href="/skills/brain-refresh">
+    Re-scan all collections and regenerate vector embeddings for new or changed files. Run after a bulk ingest session.
+  </Card>
+  <Card title="/brain-rebuild" icon="hammer" href="/skills/brain-rebuild">
+    Destructive. Redesigns the qmd schema, drops the old index, and rebuilds from scratch. Use only when the current structure no longer fits how you search.
+  </Card>
+</CardGroup>
+
+## Setup
+
+<CardGroup cols={2}>
+  <Card title="/setup" icon="gear" href="/skills/setup">
+    First-time initialization. Registers qmd collections and generates local vector embeddings. Run once after scaffolding.
+  </Card>
+  <Card title="/qmd-cli" icon="terminal">
+    Direct qmd CLI access from within Claude Code. Manage collections, run searches, check index status, and run maintenance commands without leaving your session.
+  </Card>
+</CardGroup>
+
+## Skill scope
+
+Three skills install globally so they are available in every Claude Code session. The rest live inside the vault and are specific to it.
+
+| Skill | Scope | Install path | Description |
+|---|---|---|---|
+| `/brain-ingest` | Global | `~/.claude/skills/brain-ingest/` | Ingest a source into the wiki |
+| `/brain-search` | Global | `~/.claude/skills/brain-search/` | Query the wiki with cited answers |
+| `/brain-refresh` | Global | `~/.claude/skills/brain-refresh/` | Re-index changed files and regenerate embeddings |
+| `/brain-rebuild` | Vault-local | `.claude/skills/brain-rebuild/` | Redesign the qmd schema from scratch |
+| `/lint` | Vault-local | `.claude/skills/lint/` | Health-check the wiki for six categories of issues |
+| `/setup` | Vault-local | `.claude/skills/setup/` | Initialize qmd collections for a new vault |
+| `/qmd-cli` | Vault-local | `.claude/skills/qmd-cli/` | Direct access to qmd CLI commands from within Claude Code |
+
+## Install or update skills
+
+Skills are scaffolded into your vault at creation time. To pull in improvements from the latest template, use `npx skills` pointing to the template directory:
+
+```bash
+# Install or update all 7 wiki skills from the latest template
+npx skills add https://github.com/jessepinkman9900/claude-second-brain/tree/main/template/.claude/skills -a claude-code -y
+
+# Or update a specific skill
+npx skills add https://github.com/jessepinkman9900/claude-second-brain/tree/main/template/.claude/skills --skill brain-ingest -a claude-code -y
+```
+
+Once installed via `npx skills`, future updates are a single command:
+
+```bash
+npx skills update -a claude-code
+```
+
+<Note>
+  Global skills (`brain-ingest`, `brain-search`, `brain-refresh`) are installed to `~/.claude/skills/` during vault setup and work in any Claude Code session — not just inside your vault directory.
+</Note>

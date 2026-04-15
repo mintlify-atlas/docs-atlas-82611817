@@ -1,0 +1,81 @@
+---
+title: "/brain-ingest: add a source to your wiki"
+description: "Run /brain-ingest to read a source, create a wiki/sources/ summary, update related topic pages, flag contradictions, and log the ingest session."
+---
+
+`/brain-ingest` runs the full 9-step ingest workflow defined in `CLAUDE.md`. You give Claude a file path, a URL, or paste text directly into the chat — it handles the rest. The result is a structured `wiki/sources/` page, updated topic and entity pages with synthesis prose (not copy-paste), contradiction callouts where the new source disagrees with existing knowledge, and a log entry recording what changed.
+
+## Where to drop files
+
+Before running `/brain-ingest`, place your raw source in one of these directories:
+
+| Directory | What goes here |
+|---|---|
+| `raw-sources/articles/` | Web articles saved as markdown |
+| `raw-sources/pdfs/` | PDF files or extracted text |
+| `raw-sources/personal/` | Personal notes flagged for ingestion |
+
+Raw sources are **immutable** — Claude never modifies anything in `raw-sources/`.
+
+You can also pass a URL directly, or paste text into the chat — Claude treats whatever you share as the source.
+
+## Ingest workflow
+
+<Steps>
+  <Step title="Read the source">
+    Claude reads the file at the path you provided, fetches the full content from the URL, or treats your pasted text as the source.
+  </Step>
+  <Step title="Discuss with you">
+    Claude summarizes the source in 3–5 bullets and asks: what aspects matter most? Anything to emphasize or skip? Your response shapes which topics receive deep treatment before Claude proceeds.
+  </Step>
+  <Step title="Create a source summary page">
+    Claude writes `wiki/sources/[slug].md` (slug is kebab-case from the title) with these sections: title, author/date, one-paragraph abstract, key claims (bulleted), notable quotes (max 3), a synthesis note, and links to wiki pages this source touches. Frontmatter includes `type: source-summary`, `tags`, and `updated: YYYY-MM-DD`.
+  </Step>
+  <Step title="Update wiki/index.md">
+    Claude adds the new source to the Sources Ingested section: a one-line description plus a `[[wiki/sources/slug]]` link.
+  </Step>
+  <Step title="Identify affected wiki pages">
+    Claude runs hybrid search across the wiki to surface related pages, then globs `wiki/*.md` and `wiki/sources/*.md` to catch anything search missed. It lists all pages to create or update before proceeding.
+
+    ```bash
+    INDEX_PATH=qmd.sqlite pnpm dlx @tobilu/qmd query -c wiki "<source topic and key claims>"
+    ```
+  </Step>
+  <Step title="Update or create wiki pages">
+    For each affected page, Claude reads it, integrates the new information, adds `[[wiki/sources/slug]]` to the `sources` frontmatter, and updates the `updated` date. New topic and entity pages are created for anything that doesn't have one yet. Everything is synthesis — Claude's own words with source attributions — and cross-linked aggressively: any topic or entity mentioned gets a `[[wiki/page]]` link.
+  </Step>
+  <Step title="Flag contradictions">
+    If the source disagrees with anything on an existing page, Claude adds a `> [!WARNING] Contradiction` callout stating both positions and both sources explicitly.
+  </Step>
+  <Step title="Update wiki/overview.md">
+    Only if the source shifts the high-level synthesis or introduces a significant new theme. Otherwise Claude skips this step.
+  </Step>
+  <Step title="Append to the log">
+    Claude appends to `wiki/log.md` (never overwrites it):
+
+    ```
+    ## [YYYY-MM-DD] ingest | Source Title
+
+    [[wiki/sources/slug]] | Pages touched: [[wiki/page1]], [[wiki/page2]], ...
+    ```
+  </Step>
+</Steps>
+
+## What gets created
+
+| Output | Location |
+|---|---|
+| Source summary page | `wiki/sources/[slug].md` |
+| Updated topic/entity pages | `wiki/[topic].md` or `wiki/[entity].md` |
+| New index entry | `wiki/index.md` — Sources Ingested section |
+| Log entry | `wiki/log.md` |
+
+## Hard rules
+
+- Claude never modifies anything in `raw-sources/` — those files are immutable raw inputs.
+- Every wiki page written by this skill has frontmatter with at least `type` and `updated`.
+- One source summary page per source — two sources are never merged into a single page.
+
+<Note>
+  `/brain-ingest` is a **global** skill installed at `~/.claude/skills/brain-ingest/SKILL.md`. It is available in any Claude Code session, not just inside your vault directory.
+</Note>

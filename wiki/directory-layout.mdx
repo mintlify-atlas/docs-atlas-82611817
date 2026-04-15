@@ -1,0 +1,94 @@
+---
+title: "Vault directory layout"
+description: "The vault layout: which folders Claude owns, which are yours, where Obsidian config lives, and how vault-local vs. global skills are structured."
+---
+
+Your vault is a single folder on disk. Everything — the wiki, your raw sources, the search index configuration, and the Obsidian workspace — lives inside it. Claude owns `wiki/` entirely and never touches anything else. You own `raw-sources/` and every other file at the vault root. Understanding this boundary is the key to working safely with the system.
+
+## Directory tree
+
+```
+my-brain/
+├── CLAUDE.md              ← The schema. Claude reads this every session.
+├── raw-sources/           ← Your raw inputs. Claude never modifies these.
+│   ├── articles/          ← Web articles saved as markdown
+│   ├── pdfs/              ← PDF files or extracted text
+│   └── personal/          ← Personal notes flagged for ingestion
+├── wiki/                  ← Claude owns this entirely.
+│   ├── index.md           ← Master index of all wiki pages
+│   ├── log.md             ← Running log of all wiki activity
+│   ├── overview.md        ← Evolving high-level synthesis
+│   ├── sources/           ← One summary page per ingested source
+│   ├── qa/                ← Filed answers to notable queries
+│   └── [topic/entity pages at root of wiki/]
+└── scripts/qmd/           ← Semantic search setup and re-indexing
+```
+
+## Folder-by-folder reference
+
+### `CLAUDE.md`
+
+The schema file that Claude reads at the start of every session. It defines the five page types, frontmatter format, naming conventions, and the hard rules Claude follows when writing. If you want to change how Claude behaves in the wiki, edit this file — it is the only configuration Claude consults during wiki work.
+
+### `raw-sources/`
+
+Your raw inputs. Drop files here before running `/brain-ingest`.
+
+<Warning>
+  Claude never modifies anything in `raw-sources/`. These files are immutable raw inputs. If Claude were to edit them, provenance would be lost — you would no longer know what you originally saved versus what the model changed.
+</Warning>
+
+The three subdirectories map to the most common source formats:
+
+| Subdirectory | What to put here |
+|---|---|
+| `raw-sources/articles/` | Web articles saved as markdown (e.g. via Markdownload or a browser extension) |
+| `raw-sources/pdfs/` | PDF files or text extracted from PDFs |
+| `raw-sources/personal/` | Your own notes, highlights, or ideas flagged for ingestion |
+
+### `wiki/`
+
+Claude owns this directory entirely. Every file inside `wiki/` is created and maintained by Claude following the schema in `CLAUDE.md`. You can read and link to these files freely, but manual edits may be overwritten on the next ingest that touches a given page.
+
+The structure inside `wiki/` mirrors the five page types:
+
+| File / folder | Purpose |
+|---|---|
+| `wiki/index.md` | Master index of all wiki pages, organized by type. Updated after every ingest. |
+| `wiki/log.md` | Append-only activity log. Claude adds an entry after every ingest, query, or lint run. |
+| `wiki/overview.md` | The single evolving synthesis narrative. Updated when a new source shifts the high-level picture. |
+| `wiki/sources/` | One `source-summary` page per ingested source, named by kebab-case slug. |
+| `wiki/qa/` | Filed answers to notable queries that synthesize multiple pages in a useful way. |
+| `wiki/*.md` (root) | Topic and entity pages — one per concept, person, tool, or project. |
+
+### `scripts/qmd/`
+
+Contains the TypeScript setup script (`setup.ts`) that registers qmd collections and contexts, and the reindex script invoked by `pnpm qmd:reindex`. You typically do not need to edit these files — `/setup` runs `setup.ts` for you on first initialization, and `/brain-rebuild` patches it if you want to redesign the search schema.
+
+## The `.obsidian/` folder
+
+<Tip>
+  The vault folder is a valid Obsidian vault — open it directly in Obsidian without any additional configuration. The `.obsidian/` folder is pre-configured and committed to git, so it works from the first clone.
+</Tip>
+
+The `.obsidian/` folder contains a pre-configured workspace:
+
+- **obsidian-git** community plugin is pre-installed and listed in `community-plugins.json`. Enable it once in Obsidian settings and it will auto-commit and pull on a schedule — no manual git commands needed from within Obsidian.
+- Core plugins, appearance settings, and the community plugin manifest are all committed so every device that clones the repo gets the same workspace setup.
+
+## Vault-local vs. global skills
+
+Claude Code skills are slash commands stored as `SKILL.md` files that Claude reads when you invoke them.
+
+| Location | Skills | Scope |
+|---|---|---|
+| `.claude/skills/` (inside the vault) | `brain-rebuild`, `lint`, `setup`, `qmd-cli` | Available only in this vault's Claude Code session |
+| `~/.claude/skills/` (global) | `brain-ingest`, `brain-search`, `brain-refresh` | Available in any Claude Code session on this machine |
+
+The three global skills (`/brain-ingest`, `/brain-search`, `/brain-refresh`) are installed to `~/.claude/skills/` during scaffold so you can run them regardless of which directory you open Claude Code from. The vault-local skills are specific to the wiki's internal maintenance and only make sense in the context of this vault.
+
+To update any skill to the latest version from the template:
+
+```bash
+npx skills add https://github.com/jessepinkman9900/claude-second-brain/tree/main/template/.claude/skills -a claude-code -y
+```

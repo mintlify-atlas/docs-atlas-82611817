@@ -1,0 +1,35 @@
+---
+title: "Roadmap"
+description: "Planned features and the direction of claude-second-brain — from scheduled automation to richer Claude Code skills for source discovery and clustering."
+---
+
+claude-second-brain is an actively developed project. The current focus is on making the core ingest-search-refresh loop as reliable as possible, then layering in GitHub-native automation so your wiki stays fresh without manual intervention. The items below reflect the planned direction; check GitHub for the current status of each.
+
+<Info>
+  The roadmap reflects planned directions and is subject to change. Check the [GitHub repository](https://github.com/jessepinkman9900/claude-second-brain) for the latest status on open issues and in-progress work.
+</Info>
+
+## Planned features
+
+<CardGroup cols={2}>
+  <Card title="Scheduled brain-refresh" icon="clock">
+    A GitHub Actions workflow that invokes `/brain-refresh` on a configurable schedule — keeping vector embeddings current even when you haven't opened Claude Code recently.
+  </Card>
+  <Card title="Agentic GitHub workflows" icon="git-branch">
+    Fully automated wiki maintenance triggered by repository events: auto-ingest on push, scheduled lint runs, and automatic source summaries when new files land in `raw-sources/`.
+  </Card>
+  <Card title="More Claude Code skills" icon="wand-magic-sparkles">
+    New slash commands extending the skill set beyond ingest and search — starting with source discovery (find relevant material you haven't read yet) and topic clustering (surface structural gaps in the wiki).
+  </Card>
+  <Card title="Get involved" icon="github" href="https://github.com/jessepinkman9900/claude-second-brain">
+    Browse open issues, track progress on planned features, or open a discussion about a workflow you'd like to see supported.
+  </Card>
+</CardGroup>
+
+## Get involved
+
+The project is built in the open and welcomes contributions of all kinds — bug reports, skill improvements, new workflow ideas, and documentation fixes. Start by browsing [open issues](https://github.com/jessepinkman9900/claude-second-brain/issues) or opening a discussion in the repository.
+
+<Note>
+  claude-second-brain is MIT licensed. You are free to fork it, adapt the template, and build your own skill packs on top of it.
+</Note>

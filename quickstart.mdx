@@ -1,80 +1,98 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Scaffold a claude-second-brain vault, initialize the local search index, and open your wiki in Obsidian — from zero to first ingest in about five minutes."
 ---
 
-## Get started in three steps
-
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+This guide walks you through scaffolding a new vault, initializing the local search index inside Claude Code, and opening your wiki in Obsidian. The whole process takes about five minutes — plus a one-time ~2 GB model download when you run `/setup`.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **Requirements before you start:**
+  - [Claude Code](https://claude.ai/code) — the CLI that runs the wiki
+  - [mise](https://mise.jdx.dev/) — auto-installed by the scaffold CLI if missing
+  - [Obsidian](https://obsidian.md/) — optional but strongly recommended for graph view, backlinks, and mobile reading
+  - `gh` CLI — optional, required only if you want the CLI to create and push a GitHub repo for you
 </Note>
+
+<Steps>
+  <Step title="Scaffold your vault">
+    Run the scaffold command from any directory where you want your vault created:
+
+    <CodeGroup>
+      ```bash npx
+      npx claude-second-brain
+      ```
+    </CodeGroup>
+
+    The CLI opens an interactive prompt and asks three questions:
+
+    | Prompt | Default | Notes |
+    |---|---|---|
+    | **Where to create your brain?** | `my-brain` | The folder name for your vault |
+    | **Where to store the qmd index?** | `~/.cache/qmd/index.sqlite` | Local hybrid search index path |
+    | **Create a private GitHub repo?** | No | Requires `gh` CLI; creates repo and pushes automatically |
+
+    After you answer, the CLI scaffolds the vault, installs `mise` + `node` + `pnpm`, runs `pnpm install`, and runs `git init`. The resulting folder is already a valid Obsidian vault with the Git plugin pre-configured.
+
+    If you opted in to GitHub creation, the repo is created and pushed at this point — you can skip straight to step 3.
+  </Step>
+
+  <Step title="Initialize inside Claude Code">
+    Open Claude Code inside your new vault:
+
+    ```bash
+    cd my-brain
+    claude
+    ```
+
+    Then run the setup slash command inside Claude Code:
+
+    ```
+    /setup
+    ```
+
+    `/setup` registers the qmd search collections and generates local vector embeddings for every page in the vault. The first run downloads approximately 2 GB of GGUF embedding models — this happens once and is cached locally for all future sessions.
+
+    <Tip>
+      The scaffold CLI (`npx claude-second-brain`) already installed `/brain-ingest`, `/brain-search`, and `/brain-refresh` globally to `~/.claude/skills/` during step 1 — they work in any Claude Code session on this machine.
+    </Tip>
+  </Step>
+
+  <Step title="Open in Obsidian and connect GitHub">
+    **If you created a GitHub repo during scaffolding**, it's already pushed. Open `my-brain/` as a vault in Obsidian and you're done.
+
+    **If you skipped GitHub during scaffolding**, connect it now before opening Obsidian:
+
+    ```bash
+    git remote add origin https://github.com/you/my-brain.git
+    git push -u origin main
+    ```
+
+    Then open the `my-brain/` folder as a vault in Obsidian. The bundled `.obsidian` folder pre-configures the [obsidian-git](https://github.com/Vinzent03/obsidian-git) community plugin — enable it and your wiki will sync automatically on every commit.
+  </Step>
+</Steps>
+
+## Access from anywhere
+
+Once your vault is on GitHub, you can read and edit from any device.
+
+<Tip>
+  **Edit anywhere with Claude Code on desktop or mobile.** Claude Code's GitHub integration lets you open the repo and work from anywhere — ingest a source, run a query, or update a page directly from your phone.
+</Tip>
+
+<Tip>
+  **Read anywhere with Obsidian desktop and mobile.** On iOS, place the repo folder inside iCloud Drive — Obsidian Mobile picks it up natively with no extra setup. Graph view, backlinks, and offline reading all work out of the box.
+</Tip>
+
+<Tip>
+  **Browse anywhere on GitHub.** The vault is a plain GitHub repo. You can view and edit files directly in the browser at any time — no app required.
+</Tip>
+
+## Your first ingest
+
+With the vault running, drop any article, PDF, or personal note into the appropriate `raw-sources/` subfolder and run `/brain-ingest` inside Claude Code:
+
+```
+/brain-ingest
+```
+
+Claude summarizes the source, asks what matters most to you, creates a `wiki/sources/` page, updates or creates related topic pages, flags any contradictions with existing knowledge, and logs everything. Run `/brain-search` to query what you know.
